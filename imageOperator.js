@@ -1,5 +1,4 @@
 import { Jimp } from "jimp";
-import fs from "fs";
 import path from "path";
 
 const __dirname = path.resolve();
@@ -17,15 +16,19 @@ async function readImage(imagePath) {
 
 export async function processImage(imagePath, operations) {
   const image = await readImage(imagePath);
-  const getImage = () => image.getBuffer("image/png");
-
+  let format = "png";
+  const getImage = () => image.getBuffer("image/" + format);
   if (!image) return null;
-  if (!operations || operations.length === 0) return getImage();
 
   for (const operation of operations) {
+    if (operation.name == "format") {
+      format = operation.args[0];
+      continue;
+    }
     const { name, args } = operation;
     await performOperation(image, name, args);
   }
+
   return getImage();
 }
 
